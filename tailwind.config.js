@@ -1,13 +1,8 @@
+/** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ["./src/**/*.{js,jsx,ts,tsx}"],
-  safelist: [
-    "bg-sunny",
-    "bg-cloudy",
-    "bg-rainy",
-    "bg-snowy"
-  ],
+  content: ["./src/**/*.{js,jsx,ts,tsx,html}"],
   theme: {
     extend: {},
   },
   plugins: [],
-}
+};

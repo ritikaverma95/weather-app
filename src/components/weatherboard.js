@@ -8,7 +8,6 @@ const Weather = () => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // ✅ Your deployed Flask backend
   const API_BASE = "https://weather-app-901d.onrender.com";
 
   useEffect(() => {
@@ -26,16 +25,16 @@ const Weather = () => {
               setWeather(null);
               setError(data.message || "City not found");
             }
+            setLoading(false);
           })
           .catch(() => {
             if (!retry) {
-              // 🔁 Retry once after 2 seconds (for Render wake-up)
               setTimeout(() => fetchWeather(true), 2000);
             } else {
               setError("Failed to fetch weather data");
+              setLoading(false);
             }
-          })
-          .finally(() => setLoading(false));
+          });
       };
 
       fetchWeather();
@@ -49,69 +48,63 @@ const Weather = () => {
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === "Enter") {
-      handleSearch();
-    }
+    if (e.key === "Enter") handleSearch();
   };
 
-  // ✅ Background logic
+  // ✅ Use background image classes from tailwind.css
   const getBackground = () => {
-    if (!weather || !weather.weather)
-      return "bg-gradient-to-b from-blue-400 to-blue-700";
+    if (!weather || !weather.weather) return "bg-sunny"; // default sunny
 
     const condition = weather.weather[0].main.toLowerCase();
     if (condition.includes("clear")) return "bg-sunny";
     if (condition.includes("cloud")) return "bg-cloudy";
     if (condition.includes("rain")) return "bg-rainy";
     if (condition.includes("snow")) return "bg-snowy";
-    return "bg-gradient-to-b from-blue-400 to-blue-700";
+
+    return "bg-sunny";
   };
 
-  // ✅ Title color
   const getTitleColor = () => {
-    if (!weather || !weather.weather) return "text-blue-500";
+    if (!weather || !weather.weather) return "text-blue-200";
     const condition = weather.weather[0].main.toLowerCase();
-    if (condition.includes("clear")) return "text-yellow-400";
-    if (condition.includes("cloud")) return "text-gray-300";
-    if (condition.includes("rain")) return "text-blue-300";
-    if (condition.includes("snow")) return "text-white";
-    return "text-blue-500";
+    if (condition.includes("clear"))
+      return "text-yellow-300 drop-shadow-md";
+    if (condition.includes("cloud"))
+      return "text-gray-200 drop-shadow-md";
+    if (condition.includes("rain"))
+      return "text-blue-200 drop-shadow-md";
+    if (condition.includes("snow"))
+      return "text-white drop-shadow-md";
+    return "text-blue-200";
   };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 text-blue-600">
-      {/* Page Heading */}
-      <h1 className="text-2xl sm:text-4xl font-extrabold mb-2 drop-shadow-md text-blue-900 text-center">
+      <h1 className="text-5xl sm:text-6xl font-extrabold mb-3 text-blue-900 text-center drop-shadow-xl tracking-wide">
         Live Weather Updates 🌤
       </h1>
-      <p className="text-gray-600 mb-6 italic text-center text-sm sm:text-base">
+      <p className="text-gray-600 mb-6 italic text-center text-base sm:text-lg">
         "Check temperature, humidity & wind in real-time"
       </p>
 
       {/* Weather Card */}
       <div
-        className={`relative w-full max-w-md p-6 mx-auto rounded-2xl shadow-2xl m-6 transition-all duration-500 overflow-hidden ${getBackground()}`}
+        className={`relative w-full max-w-md p-6 mx-auto rounded-3xl shadow-2xl transition-all duration-700 ${getBackground()} bg-cover bg-center text-white`}
       >
-        {/* Overlay */}
-        <div className="absolute inset-0 bg-black/40 rounded-2xl"></div>
-
-        {/* Loader Overlay */}
         {loading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-2xl z-20">
-            <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+          <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded-3xl z-20">
+            <div className="w-14 h-14 border-4 border-white/80 border-t-transparent rounded-full animate-spin"></div>
           </div>
         )}
 
-        {/* Content */}
-        <div className="relative z-10 text-white text-center">
+        <div className="relative z-10 text-center">
           <h1
-            className={`text-2xl sm:text-3xl font-bold mb-6 flex items-center justify-center gap-2 drop-shadow-md ${getTitleColor()}`}
+            className={`text-3xl sm:text-4xl text-blue-900 font-bold mb-6 flex items-center justify-center gap-3 ${getTitleColor()}`}
           >
-            🌤 <span>Weather App</span>
+            🌍 Weather App
           </h1>
 
-          {/* Search Bar */}
-          <div className="flex items-center justify-between bg-white rounded-lg overflow-hidden shadow-md mb-6">
+          <div className="flex items-center justify-between bg-white rounded-full overflow-hidden shadow-lg mb-6">
             <input
               type="text"
               placeholder="Enter City Name"
@@ -119,37 +112,35 @@ const Weather = () => {
               value={city}
               onChange={(e) => setCity(e.target.value)}
               onKeyDown={handleKeyDown}
-              className="flex-1 px-4 py-2 text-gray-700 focus:outline-none text-sm sm:text-base"
+              className="flex-1 px-5 py-3 text-gray-700 focus:outline-none text-sm sm:text-base"
             />
             <button
               onClick={handleSearch}
-              className="bg-blue-500 hover:bg-blue-600 px-4 py-2 flex items-center justify-center"
+              className="bg-blue-500 hover:bg-blue-600 px-5 py-3 flex items-center justify-center transition"
             >
               <img
                 src="https://cdn-icons-png.flaticon.com/512/622/622669.png"
                 alt="search"
-                className="w-5 h-5"
+                className="w-5 h-5 invert"
               />
             </button>
           </div>
 
-          {/* Weather Display */}
           {error && !loading && (
             <p className="text-red-400 font-semibold">{error}</p>
           )}
           {weather && !loading && <City weather={weather} />}
 
-          {/* Weather Condition Text */}
           {weather && weather.weather && !loading && (
-            <p className="text-lg font-semibold mt-4">
+            <p className="text-lg font-semibold mt-5 drop-shadow-lg">
               {weather.weather[0].main.toLowerCase().includes("clear") &&
-                "☀ Weather is Clear"}
+                "☀ The weather is Clear"}
               {weather.weather[0].main.toLowerCase().includes("cloud") &&
-                "🌥 Weather is Cloudy"}
+                "🌥 The weather is Cloudy"}
               {weather.weather[0].main.toLowerCase().includes("rain") &&
-                "🌧 Weather is Rainy"}
+                "🌧 The weather is Rainy"}
               {weather.weather[0].main.toLowerCase().includes("snow") &&
-                "❄ Weather is Snowy"}
+                "❄ The weather is Snowy"}
               {!["clear", "cloud", "rain", "snow"].some((c) =>
                 weather.weather[0].main.toLowerCase().includes(c)
               ) && `🌍 Weather is ${weather.weather[0].main}`}
@@ -158,9 +149,9 @@ const Weather = () => {
         </div>
       </div>
 
-      {/* Footer */}
-      <p className="text-gray-500 text-sm mt-4 text-center">
-        🌍 Powered by <span className="font-semibold">OpenWeatherMap</span>
+      <p className="text-gray-500 text-sm mt-6 text-center italic">
+        🌍 Powered by{" "}
+        <span className="font-semibold text-blue-700">OpenWeatherMap</span>
       </p>
     </div>
   );
