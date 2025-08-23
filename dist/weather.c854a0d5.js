@@ -16135,26 +16135,38 @@ parcelHelpers.defineInteropFlag(exports);
 var _jsxDevRuntime = require("react/jsx-dev-runtime");
 var _react = require("react");
 var _reactDefault = parcelHelpers.interopDefault(_react);
-var _weathercity = require("./weathercity");
+var _weathercity = require("./Weathercity");
 var _weathercityDefault = parcelHelpers.interopDefault(_weathercity);
 var _s = $RefreshSig$();
 const Weather = ()=>{
     _s();
-    const [city, setCity] = (0, _react.useState)("Delhi"); // default city
+    const [city, setCity] = (0, _react.useState)("Delhi");
     const [selectedCity, setSelectedCity] = (0, _react.useState)("Delhi");
     const [weather, setWeather] = (0, _react.useState)(null);
     const [error, setError] = (0, _react.useState)(null);
-    // ✅ Fetch weather from Flask backend instead of exposing API key
+    const [loading, setLoading] = (0, _react.useState)(false);
+    // ✅ Your deployed Flask backend
+    const API_BASE = "https://weather-app-901d.onrender.com";
     (0, _react.useEffect)(()=>{
-        if (selectedCity) fetch(`http://127.0.0.1:5000/weather?city=${selectedCity}`).then((res)=>res.json()).then((data)=>{
-            if (data.cod === 200) {
-                setWeather(data);
-                setError(null);
-            } else {
-                setWeather(null);
-                setError(data.message || "City not found");
-            }
-        }).catch(()=>setError("Failed to fetch weather data"));
+        if (selectedCity) {
+            setLoading(true);
+            const fetchWeather = (retry = false)=>{
+                fetch(`${API_BASE}/weather?city=${selectedCity}`).then((res)=>res.json()).then((data)=>{
+                    if (data.cod === 200) {
+                        setWeather(data);
+                        setError(null);
+                    } else {
+                        setWeather(null);
+                        setError(data.message || "City not found");
+                    }
+                }).catch(()=>{
+                    if (!retry) // 🔁 Retry once after 2 seconds (for Render wake-up)
+                    setTimeout(()=>fetchWeather(true), 2000);
+                    else setError("Failed to fetch weather data");
+                }).finally(()=>setLoading(false));
+            };
+            fetchWeather();
+        }
     }, [
         selectedCity
     ]);
@@ -16164,7 +16176,7 @@ const Weather = ()=>{
     const handleKeyDown = (e)=>{
         if (e.key === "Enter") handleSearch();
     };
-    // ✅ Your original background logic
+    // ✅ Background logic
     const getBackground = ()=>{
         if (!weather || !weather.weather) return "bg-gradient-to-b from-blue-400 to-blue-700";
         const condition = weather.weather[0].main.toLowerCase();
@@ -16174,7 +16186,7 @@ const Weather = ()=>{
         if (condition.includes("snow")) return "bg-snowy";
         return "bg-gradient-to-b from-blue-400 to-blue-700";
     };
-    // ✅ Dynamic title color
+    // ✅ Title color
     const getTitleColor = ()=>{
         if (!weather || !weather.weather) return "text-blue-500";
         const condition = weather.weather[0].main.toLowerCase();
@@ -16185,52 +16197,66 @@ const Weather = ()=>{
         return "text-blue-500";
     };
     return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
-        className: "min-h-screen flex flex-col items-center justify-center text-blue-600",
+        className: "min-h-screen flex flex-col items-center justify-center px-4 text-blue-600",
         children: [
             /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("h1", {
-                className: "text-4xl font-extrabold mb-2 drop-shadow-md text-blue-900",
+                className: "text-2xl sm:text-4xl font-extrabold mb-2 drop-shadow-md text-blue-900 text-center",
                 children: "Live Weather Updates \uD83C\uDF24"
             }, void 0, false, {
                 fileName: "src/components/weatherboard.js",
-                lineNumber: 67,
+                lineNumber: 84,
                 columnNumber: 7
             }, undefined),
             /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
-                className: "text-gray-600 mb-6 italic",
+                className: "text-gray-600 mb-6 italic text-center text-sm sm:text-base",
                 children: '"Check temperature, humidity & wind in real-time"'
             }, void 0, false, {
                 fileName: "src/components/weatherboard.js",
-                lineNumber: 70,
+                lineNumber: 87,
                 columnNumber: 7
             }, undefined),
             /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
-                className: `relative w-96 max-w-full p-6 mx-auto rounded-2xl shadow-2xl m-10 transition-all duration-500 overflow-hidden ${getBackground()}`,
+                className: `relative w-full max-w-md p-6 mx-auto rounded-2xl shadow-2xl m-6 transition-all duration-500 overflow-hidden ${getBackground()}`,
                 children: [
                     /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
                         className: "absolute inset-0 bg-black/40 rounded-2xl"
                     }, void 0, false, {
                         fileName: "src/components/weatherboard.js",
-                        lineNumber: 79,
+                        lineNumber: 96,
                         columnNumber: 9
+                    }, undefined),
+                    loading && /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
+                        className: "absolute inset-0 flex items-center justify-center bg-black/50 rounded-2xl z-20",
+                        children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
+                            className: "w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin"
+                        }, void 0, false, {
+                            fileName: "src/components/weatherboard.js",
+                            lineNumber: 101,
+                            columnNumber: 13
+                        }, undefined)
+                    }, void 0, false, {
+                        fileName: "src/components/weatherboard.js",
+                        lineNumber: 100,
+                        columnNumber: 11
                     }, undefined),
                     /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
                         className: "relative z-10 text-white text-center",
                         children: [
                             /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("h1", {
-                                className: `text-3xl font-bold mb-6 flex items-center justify-center gap-2 drop-shadow-md ${getTitleColor()}`,
+                                className: `text-2xl sm:text-3xl font-bold mb-6 flex items-center justify-center gap-2 drop-shadow-md ${getTitleColor()}`,
                                 children: [
                                     "\uD83C\uDF24 ",
                                     /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("span", {
                                         children: "Weather App"
                                     }, void 0, false, {
                                         fileName: "src/components/weatherboard.js",
-                                        lineNumber: 86,
+                                        lineNumber: 110,
                                         columnNumber: 16
                                     }, undefined)
                                 ]
                             }, void 0, true, {
                                 fileName: "src/components/weatherboard.js",
-                                lineNumber: 83,
+                                lineNumber: 107,
                                 columnNumber: 11
                             }, undefined),
                             /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
@@ -16243,10 +16269,10 @@ const Weather = ()=>{
                                         value: city,
                                         onChange: (e)=>setCity(e.target.value),
                                         onKeyDown: handleKeyDown,
-                                        className: "flex-1 px-4 py-2 text-gray-700 focus:outline-none"
+                                        className: "flex-1 px-4 py-2 text-gray-700 focus:outline-none text-sm sm:text-base"
                                     }, void 0, false, {
                                         fileName: "src/components/weatherboard.js",
-                                        lineNumber: 91,
+                                        lineNumber: 115,
                                         columnNumber: 13
                                     }, undefined),
                                     /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("button", {
@@ -16258,36 +16284,36 @@ const Weather = ()=>{
                                             className: "w-5 h-5"
                                         }, void 0, false, {
                                             fileName: "src/components/weatherboard.js",
-                                            lineNumber: 104,
+                                            lineNumber: 128,
                                             columnNumber: 15
                                         }, undefined)
                                     }, void 0, false, {
                                         fileName: "src/components/weatherboard.js",
-                                        lineNumber: 100,
+                                        lineNumber: 124,
                                         columnNumber: 13
                                     }, undefined)
                                 ]
                             }, void 0, true, {
                                 fileName: "src/components/weatherboard.js",
-                                lineNumber: 90,
+                                lineNumber: 114,
                                 columnNumber: 11
                             }, undefined),
-                            error && /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
+                            error && !loading && /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
                                 className: "text-red-400 font-semibold",
                                 children: error
                             }, void 0, false, {
                                 fileName: "src/components/weatherboard.js",
-                                lineNumber: 113,
-                                columnNumber: 21
+                                lineNumber: 138,
+                                columnNumber: 13
                             }, undefined),
-                            selectedCity && /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _weathercityDefault.default), {
-                                name: selectedCity
+                            weather && !loading && /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _weathercityDefault.default), {
+                                weather: weather
                             }, void 0, false, {
                                 fileName: "src/components/weatherboard.js",
-                                lineNumber: 114,
-                                columnNumber: 28
+                                lineNumber: 140,
+                                columnNumber: 35
                             }, undefined),
-                            weather && weather.weather && /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
+                            weather && weather.weather && !loading && /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
                                 className: "text-lg font-semibold mt-4",
                                 children: [
                                     weather.weather[0].main.toLowerCase().includes("clear") && "\u2600 Weather is Clear",
@@ -16303,23 +16329,23 @@ const Weather = ()=>{
                                 ]
                             }, void 0, true, {
                                 fileName: "src/components/weatherboard.js",
-                                lineNumber: 116,
+                                lineNumber: 144,
                                 columnNumber: 13
                             }, undefined)
                         ]
                     }, void 0, true, {
                         fileName: "src/components/weatherboard.js",
-                        lineNumber: 82,
+                        lineNumber: 106,
                         columnNumber: 9
                     }, undefined)
                 ]
             }, void 0, true, {
                 fileName: "src/components/weatherboard.js",
-                lineNumber: 75,
+                lineNumber: 92,
                 columnNumber: 7
             }, undefined),
             /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
-                className: "text-gray-500 text-sm mt-4",
+                className: "text-gray-500 text-sm mt-4 text-center",
                 children: [
                     "\uD83C\uDF0D Powered by ",
                     /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("span", {
@@ -16327,23 +16353,23 @@ const Weather = ()=>{
                         children: "OpenWeatherMap"
                     }, void 0, false, {
                         fileName: "src/components/weatherboard.js",
-                        lineNumber: 135,
+                        lineNumber: 163,
                         columnNumber: 23
                     }, undefined)
                 ]
             }, void 0, true, {
                 fileName: "src/components/weatherboard.js",
-                lineNumber: 134,
+                lineNumber: 162,
                 columnNumber: 7
             }, undefined)
         ]
     }, void 0, true, {
         fileName: "src/components/weatherboard.js",
-        lineNumber: 65,
+        lineNumber: 82,
         columnNumber: 5
     }, undefined);
 };
-_s(Weather, "eOe9kK9N/T7YmoOJO26Mr1RTWJA=");
+_s(Weather, "KSatpqj9rBG9TuPqVKkY7MYtmFw=");
 _c = Weather;
 exports.default = Weather;
 var _c;
@@ -16354,198 +16380,7 @@ $RefreshReg$(_c, "Weather");
   globalThis.$RefreshReg$ = prevRefreshReg;
   globalThis.$RefreshSig$ = prevRefreshSig;
 }
-},{"react/jsx-dev-runtime":"dVPUn","react":"jMk1U","./weathercity":"8BCGm","@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"7h6Pi"}],"8BCGm":[function(require,module,exports,__globalThis) {
-var $parcel$ReactRefreshHelpers$2253 = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
-$parcel$ReactRefreshHelpers$2253.init();
-var prevRefreshReg = globalThis.$RefreshReg$;
-var prevRefreshSig = globalThis.$RefreshSig$;
-$parcel$ReactRefreshHelpers$2253.prelude(module);
-
-try {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-var _jsxDevRuntime = require("react/jsx-dev-runtime");
-var _react = require("react");
-var _reactDefault = parcelHelpers.interopDefault(_react);
-var _s = $RefreshSig$();
-const City = ({ name })=>{
-    _s();
-    const [weather, setWeather] = (0, _react.useState)(null);
-    const [error, setError] = (0, _react.useState)("");
-    (0, _react.useEffect)(()=>{
-        const fetchWeather = async ()=>{
-            const apiKey = "2dd1db1bb2f9ff9f4df5d940119bdf12";
-            const url = `https://api.openweathermap.org/data/2.5/weather?q=${name}&appid=${apiKey}&units=metric`;
-            try {
-                const response = await fetch(url);
-                const data = await response.json();
-                if (data.cod === 200) {
-                    setWeather(data);
-                    setError("");
-                } else {
-                    setError("City not found!");
-                    setWeather(null);
-                }
-            } catch (err) {
-                setError("Error fetching weather.");
-                setWeather(null);
-            }
-        };
-        if (name) fetchWeather();
-    }, [
-        name
-    ]);
-    if (error) return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
-        className: "text-red-500",
-        children: error
-    }, void 0, false, {
-        fileName: "src/components/weathercity.js",
-        lineNumber: 31,
-        columnNumber: 12
-    }, undefined);
-    if (!weather) return null;
-    return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
-        className: "mt-6 text-white",
-        children: [
-            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
-                className: "mb-6",
-                children: [
-                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("img", {
-                        src: `https://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`,
-                        alt: "weather icon",
-                        className: "w-24 h-24 mx-auto"
-                    }, void 0, false, {
-                        fileName: "src/components/weathercity.js",
-                        lineNumber: 42,
-                        columnNumber: 9
-                    }, undefined),
-                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("h1", {
-                        className: "text-3xl font-bold",
-                        children: [
-                            Math.round(weather.main.temp),
-                            "\xb0C"
-                        ]
-                    }, void 0, true, {
-                        fileName: "src/components/weathercity.js",
-                        lineNumber: 47,
-                        columnNumber: 9
-                    }, undefined),
-                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("h2", {
-                        className: "text-lg mt-1",
-                        children: weather.name
-                    }, void 0, false, {
-                        fileName: "src/components/weathercity.js",
-                        lineNumber: 48,
-                        columnNumber: 9
-                    }, undefined)
-                ]
-            }, void 0, true, {
-                fileName: "src/components/weathercity.js",
-                lineNumber: 41,
-                columnNumber: 7
-            }, undefined),
-            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
-                className: "grid grid-cols-2 gap-6 mt-6",
-                children: [
-                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
-                        className: "bg-white/20 p-4 rounded-lg shadow-md flex flex-col items-center",
-                        children: [
-                            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("img", {
-                                src: "https://cdn-icons-png.flaticon.com/512/728/728093.png",
-                                alt: "humidity",
-                                className: "w-8 h-8 mb-2"
-                            }, void 0, false, {
-                                fileName: "src/components/weathercity.js",
-                                lineNumber: 55,
-                                columnNumber: 11
-                            }, undefined),
-                            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
-                                className: "text-xl font-semibold",
-                                children: [
-                                    weather.main.humidity,
-                                    "%"
-                                ]
-                            }, void 0, true, {
-                                fileName: "src/components/weathercity.js",
-                                lineNumber: 60,
-                                columnNumber: 11
-                            }, undefined),
-                            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
-                                className: "text-sm",
-                                children: "Humidity"
-                            }, void 0, false, {
-                                fileName: "src/components/weathercity.js",
-                                lineNumber: 61,
-                                columnNumber: 11
-                            }, undefined)
-                        ]
-                    }, void 0, true, {
-                        fileName: "src/components/weathercity.js",
-                        lineNumber: 54,
-                        columnNumber: 9
-                    }, undefined),
-                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
-                        className: "bg-white/20 p-4 rounded-lg shadow-md flex flex-col items-center",
-                        children: [
-                            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("img", {
-                                src: "https://cdn-icons-png.flaticon.com/512/54/54298.png",
-                                alt: "wind",
-                                className: "w-8 h-8 mb-2"
-                            }, void 0, false, {
-                                fileName: "src/components/weathercity.js",
-                                lineNumber: 65,
-                                columnNumber: 11
-                            }, undefined),
-                            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
-                                className: "text-xl font-semibold",
-                                children: [
-                                    weather.wind.speed,
-                                    " km/h"
-                                ]
-                            }, void 0, true, {
-                                fileName: "src/components/weathercity.js",
-                                lineNumber: 70,
-                                columnNumber: 11
-                            }, undefined),
-                            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
-                                className: "text-sm",
-                                children: "Wind Speed"
-                            }, void 0, false, {
-                                fileName: "src/components/weathercity.js",
-                                lineNumber: 71,
-                                columnNumber: 11
-                            }, undefined)
-                        ]
-                    }, void 0, true, {
-                        fileName: "src/components/weathercity.js",
-                        lineNumber: 64,
-                        columnNumber: 9
-                    }, undefined)
-                ]
-            }, void 0, true, {
-                fileName: "src/components/weathercity.js",
-                lineNumber: 52,
-                columnNumber: 7
-            }, undefined)
-        ]
-    }, void 0, true, {
-        fileName: "src/components/weathercity.js",
-        lineNumber: 39,
-        columnNumber: 5
-    }, undefined);
-};
-_s(City, "rncVM2c+8V4wmqBX0HN5D7pSHYo=");
-_c = City;
-exports.default = City;
-var _c;
-$RefreshReg$(_c, "City");
-
-  $parcel$ReactRefreshHelpers$2253.postlude(module);
-} finally {
-  globalThis.$RefreshReg$ = prevRefreshReg;
-  globalThis.$RefreshSig$ = prevRefreshSig;
-}
-},{"react/jsx-dev-runtime":"dVPUn","react":"jMk1U","@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"7h6Pi"}],"jnFvT":[function(require,module,exports,__globalThis) {
+},{"react/jsx-dev-runtime":"dVPUn","react":"jMk1U","@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"7h6Pi","./Weathercity":"1h8oN"}],"jnFvT":[function(require,module,exports,__globalThis) {
 exports.interopDefault = function(a) {
     return a && a.__esModule ? a : {
         default: a
@@ -18853,7 +18688,152 @@ function $da9882e673ac146b$var$ErrorOverlay() {
     return null;
 }
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT"}],"61z4w":[function(require,module,exports,__globalThis) {
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT"}],"1h8oN":[function(require,module,exports,__globalThis) {
+var $parcel$ReactRefreshHelpers$2e20 = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+$parcel$ReactRefreshHelpers$2e20.init();
+var prevRefreshReg = globalThis.$RefreshReg$;
+var prevRefreshSig = globalThis.$RefreshSig$;
+$parcel$ReactRefreshHelpers$2e20.prelude(module);
+
+try {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+var _jsxDevRuntime = require("react/jsx-dev-runtime");
+var _react = require("react");
+var _reactDefault = parcelHelpers.interopDefault(_react);
+const City = ({ weather })=>{
+    if (!weather) return null;
+    console.log("Weather Data:", weather);
+    return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
+        className: "mt-6 text-white",
+        children: [
+            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
+                className: "mb-6",
+                children: [
+                    weather.weather?.[0]?.icon && /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("img", {
+                        src: `https://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`,
+                        alt: "weather icon",
+                        className: "w-24 h-24 mx-auto"
+                    }, void 0, false, {
+                        fileName: "src/components/Weathercity.js",
+                        lineNumber: 12,
+                        columnNumber: 11
+                    }, undefined),
+                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("h1", {
+                        className: "text-3xl font-bold",
+                        children: [
+                            Math.round(weather.main.temp),
+                            "\xb0C"
+                        ]
+                    }, void 0, true, {
+                        fileName: "src/components/Weathercity.js",
+                        lineNumber: 18,
+                        columnNumber: 9
+                    }, undefined),
+                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("h2", {
+                        className: "text-lg mt-1 font-medium",
+                        children: weather.name
+                    }, void 0, false, {
+                        fileName: "src/components/Weathercity.js",
+                        lineNumber: 21,
+                        columnNumber: 9
+                    }, undefined),
+                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
+                        className: "text-sm mt-1 capitalize",
+                        children: weather.weather[0]?.description
+                    }, void 0, false, {
+                        fileName: "src/components/Weathercity.js",
+                        lineNumber: 22,
+                        columnNumber: 9
+                    }, undefined)
+                ]
+            }, void 0, true, {
+                fileName: "src/components/Weathercity.js",
+                lineNumber: 10,
+                columnNumber: 7
+            }, undefined),
+            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
+                className: "grid grid-cols-2 gap-4 mt-6",
+                children: [
+                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)(WeatherCard, {
+                        icon: "https://cdn-icons-png.flaticon.com/512/728/728093.png",
+                        value: `${weather.main.humidity}%`,
+                        label: "Humidity"
+                    }, void 0, false, {
+                        fileName: "src/components/Weathercity.js",
+                        lineNumber: 30,
+                        columnNumber: 9
+                    }, undefined),
+                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)(WeatherCard, {
+                        icon: "https://cdn-icons-png.flaticon.com/512/54/54298.png",
+                        value: `${(weather.wind.speed * 3.6).toFixed(1)} km/h`,
+                        label: "Wind Speed"
+                    }, void 0, false, {
+                        fileName: "src/components/Weathercity.js",
+                        lineNumber: 37,
+                        columnNumber: 9
+                    }, undefined)
+                ]
+            }, void 0, true, {
+                fileName: "src/components/Weathercity.js",
+                lineNumber: 28,
+                columnNumber: 7
+            }, undefined)
+        ]
+    }, void 0, true, {
+        fileName: "src/components/Weathercity.js",
+        lineNumber: 8,
+        columnNumber: 5
+    }, undefined);
+};
+_c = City;
+// ✅ Reusable card component
+const WeatherCard = ({ icon, value, label })=>/*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
+        className: "bg-white/20 p-4 rounded-lg shadow-md flex flex-col items-center",
+        children: [
+            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("img", {
+                src: icon,
+                alt: label,
+                className: "w-8 h-8 mb-2"
+            }, void 0, false, {
+                fileName: "src/components/Weathercity.js",
+                lineNumber: 50,
+                columnNumber: 5
+            }, undefined),
+            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
+                className: "text-xl font-semibold",
+                children: value
+            }, void 0, false, {
+                fileName: "src/components/Weathercity.js",
+                lineNumber: 51,
+                columnNumber: 5
+            }, undefined),
+            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
+                className: "text-sm",
+                children: label
+            }, void 0, false, {
+                fileName: "src/components/Weathercity.js",
+                lineNumber: 52,
+                columnNumber: 5
+            }, undefined)
+        ]
+    }, void 0, true, {
+        fileName: "src/components/Weathercity.js",
+        lineNumber: 49,
+        columnNumber: 3
+    }, undefined);
+_c1 = WeatherCard;
+exports.default = City;
+var _c, _c1;
+$RefreshReg$(_c, "City");
+$RefreshReg$(_c1, "WeatherCard");
+
+  $parcel$ReactRefreshHelpers$2e20.postlude(module);
+} finally {
+  globalThis.$RefreshReg$ = prevRefreshReg;
+  globalThis.$RefreshSig$ = prevRefreshSig;
+}
+},{"react/jsx-dev-runtime":"dVPUn","react":"jMk1U","@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"7h6Pi"}],"61z4w":[function(require,module,exports,__globalThis) {
 /**
  * React Router DOM v6.30.1
  *

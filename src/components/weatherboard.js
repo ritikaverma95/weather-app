@@ -8,25 +8,37 @@ const Weather = () => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // ✅ Use your deployed Flask backend
+  // ✅ Your deployed Flask backend
   const API_BASE = "https://weather-app-901d.onrender.com";
 
   useEffect(() => {
     if (selectedCity) {
       setLoading(true);
-      fetch(`${API_BASE}/weather?city=${selectedCity}`)
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.cod === 200) {
-            setWeather(data);
-            setError(null);
-          } else {
-            setWeather(null);
-            setError(data.message || "City not found");
-          }
-        })
-        .catch(() => setError("Failed to fetch weather data"))
-        .finally(() => setLoading(false));
+
+      const fetchWeather = (retry = false) => {
+        fetch(`${API_BASE}/weather?city=${selectedCity}`)
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.cod === 200) {
+              setWeather(data);
+              setError(null);
+            } else {
+              setWeather(null);
+              setError(data.message || "City not found");
+            }
+          })
+          .catch(() => {
+            if (!retry) {
+              // 🔁 Retry once after 2 seconds (for Render wake-up)
+              setTimeout(() => fetchWeather(true), 2000);
+            } else {
+              setError("Failed to fetch weather data");
+            }
+          })
+          .finally(() => setLoading(false));
+      };
+
+      fetchWeather();
     }
   }, [selectedCity]);
 
