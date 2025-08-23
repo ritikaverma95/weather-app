@@ -1,39 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 
-const City = ({ name }) => {
-  const [weather, setWeather] = useState(null);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    const fetchWeather = async () => {
-      const apiKey = "2dd1db1bb2f9ff9f4df5d940119bdf12";
-      const url = `https://api.openweathermap.org/data/2.5/weather?q=${name}&appid=${apiKey}&units=metric`;
-
-      try {
-        const response = await fetch(url);
-        const data = await response.json();
-        if (data.cod === 200) {
-          setWeather(data);
-          setError("");
-        } else {
-          setError("City not found!");
-          setWeather(null);
-        }
-      } catch (err) {
-        setError("Error fetching weather.");
-        setWeather(null);
-      }
-    };
-    if (name) fetchWeather();
-  }, [name]);
-
-  if (error) {
-    return <p className="text-red-500">{error}</p>;
-  }
-
-  if (!weather) {
-    return null;
-  }
+const City = ({ weather }) => {
+  if (!weather) return null;
 
   return (
     <div className="mt-6 text-white">

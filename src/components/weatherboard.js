@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from "react";
-import City from "./weathercity";
+import City from "./Weathercity";
 
 const Weather = () => {
-  const [city, setCity] = useState("Delhi"); // default city
+  const [city, setCity] = useState("Delhi"); 
   const [selectedCity, setSelectedCity] = useState("Delhi");
   const [weather, setWeather] = useState(null);
   const [error, setError] = useState(null);
 
-  // ✅ Fetch weather from Flask backend instead of exposing API key
+  // ✅ Use your deployed Flask backend
+  const API_BASE = "https://weather-app-901d.onrender.com";
+
   useEffect(() => {
     if (selectedCity) {
-      fetch(`http://127.0.0.1:5000/weather?city=${selectedCity}`)
+      fetch(`${API_BASE}/weather?city=${selectedCity}`)
         .then((res) => res.json())
         .then((data) => {
           if (data.cod === 200) {
@@ -37,7 +39,7 @@ const Weather = () => {
     }
   };
 
-  // ✅ Your original background logic
+  // ✅ Background logic
   const getBackground = () => {
     if (!weather || !weather.weather)
       return "bg-gradient-to-b from-blue-400 to-blue-700";
@@ -50,7 +52,7 @@ const Weather = () => {
     return "bg-gradient-to-b from-blue-400 to-blue-700";
   };
 
-  // ✅ Dynamic title color
+  // ✅ Title color
   const getTitleColor = () => {
     if (!weather || !weather.weather) return "text-blue-500";
     const condition = weather.weather[0].main.toLowerCase();
@@ -111,7 +113,7 @@ const Weather = () => {
 
           {/* Weather Display */}
           {error && <p className="text-red-400 font-semibold">{error}</p>}
-          {selectedCity && <City name={selectedCity} />}
+          {weather && <City weather={weather} />}
           {weather && weather.weather && (
             <p className="text-lg font-semibold mt-4">
               {weather.weather[0].main.toLowerCase().includes("clear") &&
