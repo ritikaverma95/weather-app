@@ -2,16 +2,18 @@ import React, { useState, useEffect } from "react";
 import City from "./Weathercity";
 
 const Weather = () => {
-  const [city, setCity] = useState("Delhi"); 
+  const [city, setCity] = useState("Delhi");
   const [selectedCity, setSelectedCity] = useState("Delhi");
   const [weather, setWeather] = useState(null);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   // ✅ Use your deployed Flask backend
   const API_BASE = "https://weather-app-901d.onrender.com";
 
   useEffect(() => {
     if (selectedCity) {
+      setLoading(true);
       fetch(`${API_BASE}/weather?city=${selectedCity}`)
         .then((res) => res.json())
         .then((data) => {
@@ -23,7 +25,8 @@ const Weather = () => {
             setError(data.message || "City not found");
           }
         })
-        .catch(() => setError("Failed to fetch weather data"));
+        .catch(() => setError("Failed to fetch weather data"))
+        .finally(() => setLoading(false));
     }
   }, [selectedCity]);
 
@@ -64,26 +67,33 @@ const Weather = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center text-blue-600">
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 text-blue-600">
       {/* Page Heading */}
-      <h1 className="text-4xl font-extrabold mb-2 drop-shadow-md text-blue-900">
+      <h1 className="text-2xl sm:text-4xl font-extrabold mb-2 drop-shadow-md text-blue-900 text-center">
         Live Weather Updates 🌤
       </h1>
-      <p className="text-gray-600 mb-6 italic">
+      <p className="text-gray-600 mb-6 italic text-center text-sm sm:text-base">
         "Check temperature, humidity & wind in real-time"
       </p>
 
       {/* Weather Card */}
       <div
-        className={`relative w-96 max-w-full p-6 mx-auto rounded-2xl shadow-2xl m-10 transition-all duration-500 overflow-hidden ${getBackground()}`}
+        className={`relative w-full max-w-md p-6 mx-auto rounded-2xl shadow-2xl m-6 transition-all duration-500 overflow-hidden ${getBackground()}`}
       >
         {/* Overlay */}
         <div className="absolute inset-0 bg-black/40 rounded-2xl"></div>
 
+        {/* Loader Overlay */}
+        {loading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-2xl z-20">
+            <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        )}
+
         {/* Content */}
         <div className="relative z-10 text-white text-center">
           <h1
-            className={`text-3xl font-bold mb-6 flex items-center justify-center gap-2 drop-shadow-md ${getTitleColor()}`}
+            className={`text-2xl sm:text-3xl font-bold mb-6 flex items-center justify-center gap-2 drop-shadow-md ${getTitleColor()}`}
           >
             🌤 <span>Weather App</span>
           </h1>
@@ -97,7 +107,7 @@ const Weather = () => {
               value={city}
               onChange={(e) => setCity(e.target.value)}
               onKeyDown={handleKeyDown}
-              className="flex-1 px-4 py-2 text-gray-700 focus:outline-none"
+              className="flex-1 px-4 py-2 text-gray-700 focus:outline-none text-sm sm:text-base"
             />
             <button
               onClick={handleSearch}
@@ -112,9 +122,13 @@ const Weather = () => {
           </div>
 
           {/* Weather Display */}
-          {error && <p className="text-red-400 font-semibold">{error}</p>}
-          {weather && <City weather={weather} />}
-          {weather && weather.weather && (
+          {error && !loading && (
+            <p className="text-red-400 font-semibold">{error}</p>
+          )}
+          {weather && !loading && <City weather={weather} />}
+
+          {/* Weather Condition Text */}
+          {weather && weather.weather && !loading && (
             <p className="text-lg font-semibold mt-4">
               {weather.weather[0].main.toLowerCase().includes("clear") &&
                 "☀ Weather is Clear"}
@@ -133,7 +147,7 @@ const Weather = () => {
       </div>
 
       {/* Footer */}
-      <p className="text-gray-500 text-sm mt-4">
+      <p className="text-gray-500 text-sm mt-4 text-center">
         🌍 Powered by <span className="font-semibold">OpenWeatherMap</span>
       </p>
     </div>

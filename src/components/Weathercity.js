@@ -12,35 +12,70 @@ const City = ({ weather }) => {
           alt="weather icon"
           className="w-24 h-24 mx-auto"
         />
-        <h1 className="text-3xl font-bold">{Math.round(weather.main.temp)}°C</h1>
-        <h2 className="text-lg mt-1">{weather.name}</h2>
+        <h1 className="text-3xl font-bold">
+          {Math.round(weather.main.temp)}°C
+        </h1>
+        <h2 className="text-lg mt-1 font-medium">{weather.name}</h2>
+        <p className="text-sm mt-1 capitalize">
+          {weather.weather[0].description}
+        </p>
       </div>
 
       {/* Weather Details */}
-      <div className="grid grid-cols-2 gap-6 mt-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-6">
         {/* Humidity */}
-        <div className="bg-white/20 p-4 rounded-lg shadow-md flex flex-col items-center">
-          <img
-            src="https://cdn-icons-png.flaticon.com/512/728/728093.png"
-            alt="humidity"
-            className="w-8 h-8 mb-2"
-          />
-          <p className="text-xl font-semibold">{weather.main.humidity}%</p>
-          <p className="text-sm">Humidity</p>
-        </div>
+        <WeatherCard
+          icon="https://cdn-icons-png.flaticon.com/512/728/728093.png"
+          value={`${weather.main.humidity}%`}
+          label="Humidity"
+        />
+
         {/* Wind Speed */}
-        <div className="bg-white/20 p-4 rounded-lg shadow-md flex flex-col items-center">
-          <img
-            src="https://cdn-icons-png.flaticon.com/512/54/54298.png"
-            alt="wind"
-            className="w-8 h-8 mb-2"
-          />
-          <p className="text-xl font-semibold">{weather.wind.speed} km/h</p>
-          <p className="text-sm">Wind Speed</p>
-        </div>
+        <WeatherCard
+          icon="https://cdn-icons-png.flaticon.com/512/54/54298.png"
+          value={`${weather.wind.speed} km/h`}
+          label="Wind Speed"
+        />
+
+        {/* Feels Like */}
+        <WeatherCard
+          icon="https://cdn-icons-png.flaticon.com/512/869/869869.png"
+          value={`${Math.round(weather.main.feels_like)}°C`}
+          label="Feels Like"
+        />
+
+        {/* Pressure */}
+        <WeatherCard
+          icon="https://cdn-icons-png.flaticon.com/512/483/483356.png"
+          value={`${weather.main.pressure} hPa`}
+          label="Pressure"
+        />
+
+        {/* Min Temp */}
+        <WeatherCard
+          icon="https://cdn-icons-png.flaticon.com/512/1684/1684375.png"
+          value={`${Math.round(weather.main.temp_min)}°C`}
+          label="Min Temp"
+        />
+
+        {/* Max Temp */}
+        <WeatherCard
+          icon="https://cdn-icons-png.flaticon.com/512/1684/1684373.png"
+          value={`${Math.round(weather.main.temp_max)}°C`}
+          label="Max Temp"
+        />
       </div>
     </div>
   );
 };
+
+// ✅ Reusable card component
+const WeatherCard = ({ icon, value, label }) => (
+  <div className="bg-white/20 p-4 rounded-lg shadow-md flex flex-col items-center">
+    <img src={icon} alt={label} className="w-8 h-8 mb-2" />
+    <p className="text-xl font-semibold">{value}</p>
+    <p className="text-sm">{label}</p>
+  </div>
+);
 
 export default City;
