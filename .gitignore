@@ -1,0 +1,13 @@
+# Python
+.venv/
+__pycache__/
+
+# Node
+node_modules/
+.parcel-cache/
+
+# Environment
+.env
+
+# Others
+.DS_Store
